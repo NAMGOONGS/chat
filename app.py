@@ -1,13 +1,15 @@
 from flask import Flask, render_template, request, jsonify
-import requests
+from huggingface_hub import InferenceClient
 import os
 
 app = Flask(__name__)
-history = []  # 대화 기록
+history = [{"role": "system", "content": "You are a helpful assistant."}]  # 시스템 프롬프트 추가
 
-# Hugging Face 설정
-API_URL = "https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3.1-8B-Instruct"
-HF_TOKEN = os.getenv("HF_TOKEN")
+# Hugging Face 클라이언트 초기화
+client = InferenceClient(
+    model="meta-llama/Meta-Llama-3.1-8B-Instruct",
+    token=os.getenv("HF_TOKEN")
+)
 
 @app.route("/")
 def index():
@@ -19,34 +21,21 @@ def chat():
     if not user_msg:
         return jsonify({"reply": "메시지를 입력해주세요."}), 400
 
-    # 대화 기록에 추가
-    history.append(f"User: {user_msg}")
-
-    # Hugging Face에 요청
-    headers = {"Authorization": f"Bearer {HF_TOKEN}"}
-    prompt = "\n".join(history[-10:]) + "\nAssistant:"  # 최근 10개만
-
-    payload = {
-        "inputs": prompt,
-        "parameters": {
-            "max_new_tokens": 150,
-            "temperature": 0.7,
-            "return_full_text": False
-        }
-    }
+    # 대화 기록에 사용자 메시지 추가
+    history.append({"role": "user", "content": user_msg})
 
     try:
-        response = requests.post(API_URL, headers=headers, json=payload, timeout=30)
-        if response.status_code == 503:
-            bot_msg = "모델 로딩 중입니다. 10초 후 다시 시도해주세요."
-        elif response.status_code != 200:
-            bot_msg = f"오류 {response.status_code}: {response.text}"
-        else:
-            result = response.json()
-            bot_msg = result[0]["generated_text"].strip() if isinstance(result, list) else "응답 오류"
-            history.append(f"Assistant: {bot_msg}")
+        # 채팅 완성 생성 (OpenAI 호환 형식)
+        completion = client.chat.completions.create(
+            model="meta-llama/Meta-Llama-3.1-8B-Instruct",
+            messages=history[-10:],  # 최근 10개만
+            max_tokens=150,
+            temperature=0.7
+        )
+        bot_msg = completion.choices[0].message.content
+        history.append({"role": "assistant", "content": bot_msg})
     except Exception as e:
-        bot_msg = f"연결 오류: {str(e)}"
+        bot_msg = f"오류: {str(e)} (모델 로딩 중일 수 있음)"
 
     return jsonify({"reply": bot_msg})
 
