@@ -9,5 +9,5 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.6
-      - key: XAI_API_KEY
-        sync: false
+      - key: HF_TOKEN
+        sync: false 
