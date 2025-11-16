@@ -4,11 +4,9 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-
-# xAI API 설정
 XAI_API_KEY = os.getenv("XAI_API_KEY")
 API_URL = "https://api.x.ai/v1/chat/completions"
-MODEL = "grok-beta"  # 또는 grok-2, grok-3 등
+MODEL = "grok-beta"  # 또는 "grok-2" 시도
 
 app = Flask(__name__)
 history = []
@@ -36,15 +34,22 @@ def chat():
     }
 
     try:
+        print(f"API Key exists: {'Yes' if XAI_API_KEY else 'No'}", file=open(os.environ.get('WERKZEUG_RUN_MAIN') and open('/dev/stderr', 'w') or sys.stderr, 'w'))  # 디버그: 키 존재 확인
         response = requests.post(API_URL, json=payload, headers=headers)
         response.raise_for_status()
         data = response.json()
         bot_msg = data["choices"][0]["message"]["content"]
         history.append({"role": "assistant", "content": bot_msg})
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 403:
+            bot_msg = "API 키 오류 (403): 키가 유효하지 않거나 활성화되지 않았습니다. console.x.ai에서 재생성하세요."
+        else:
+            bot_msg = f"HTTP 오류: {e.response.status_code} - {e.response.text}"
     except Exception as e:
-        bot_msg = f"오류: {str(e)}"
+        bot_msg = f"기타 오류: {str(e)}"
 
     return jsonify({"reply": bot_msg})
 
 if __name__ == "__main__":
+    import sys
     app.run(host="0.0.0.0", port=5000, debug=True)
