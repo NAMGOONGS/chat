@@ -1,14 +1,13 @@
 from flask import Flask, render_template, request, jsonify
 import requests
 import os
-from dotenv import load_dotenv
-
-load_dotenv()
-XAI_API_KEY = os.getenv("XAI_API_KEY")
-API_URL = "https://api.x.ai/v1/chat/completions"
 
 app = Flask(__name__)
-history = [{"role": "system", "content": "You are a helpful assistant."}]  # 시스템 프롬프트 고정
+history = []  # 대화 기록
+
+# Hugging Face 설정
+API_URL = "https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3.1-8B-Instruct"
+HF_TOKEN = os.getenv("HF_TOKEN")
 
 @app.route("/")
 def index():
@@ -20,33 +19,34 @@ def chat():
     if not user_msg:
         return jsonify({"reply": "메시지를 입력해주세요."}), 400
 
-    # 사용자 메시지 추가
-    history.append({"role": "user", "content": user_msg})
+    # 대화 기록에 추가
+    history.append(f"User: {user_msg}")
 
-    headers = {
-        "Authorization": f"Bearer {XAI_API_KEY}",
-        "Content-Type": "application/json"
-    }
+    # Hugging Face에 요청
+    headers = {"Authorization": f"Bearer {HF_TOKEN}"}
+    prompt = "\n".join(history[-10:]) + "\nAssistant:"  # 최근 10개만
+
     payload = {
-        "model": "grok-4-latest",  # 최신 모델
-        "messages": history,
-        "temperature": 0.7,
-        "stream": False
+        "inputs": prompt,
+        "parameters": {
+            "max_new_tokens": 150,
+            "temperature": 0.7,
+            "return_full_text": False
+        }
     }
 
     try:
-        response = requests.post(API_URL, json=payload, headers=headers)
-        response.raise_for_status()
-        data = response.json()
-        bot_msg = data["choices"][0]["message"]["content"]
-        history.append({"role": "assistant", "content": bot_msg})
-    except requests.exceptions.HTTPError as e:
-        if e.response.status_code == 403:
-            bot_msg = "API 키 오류 (403): console.x.ai에서 새 키를 생성하고 활성화하세요."
+        response = requests.post(API_URL, headers=headers, json=payload, timeout=30)
+        if response.status_code == 503:
+            bot_msg = "모델 로딩 중입니다. 10초 후 다시 시도해주세요."
+        elif response.status_code != 200:
+            bot_msg = f"오류 {response.status_code}: {response.text}"
         else:
-            bot_msg = f"HTTP 오류: {e.response.status_code} - {e.response.text}"
+            result = response.json()
+            bot_msg = result[0]["generated_text"].strip() if isinstance(result, list) else "응답 오류"
+            history.append(f"Assistant: {bot_msg}")
     except Exception as e:
-        bot_msg = f"오류: {str(e)}"
+        bot_msg = f"연결 오류: {str(e)}"
 
     return jsonify({"reply": bot_msg})
 
