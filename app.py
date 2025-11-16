@@ -7,7 +7,7 @@ history = [{"role": "system", "content": "You are a helpful assistant."}]  # 시
 
 # Hugging Face 클라이언트 초기화
 client = InferenceClient(
-    model="meta-llama/Meta-Llama-3.1-8B-Instruct",
+    model="google/gemma-2-9b-it",
     token=os.getenv("HF_TOKEN")
 )
 
@@ -41,4 +41,5 @@ def chat():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
