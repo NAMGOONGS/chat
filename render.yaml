@@ -1,0 +1,14 @@
+# render.yaml
+services:
+  - type: web
+    name: my-chatbot
+    env: python
+    region: oregon  # 서울에 가까운 리전 (oregon 추천)
+    plan: free      # 무료 플랜
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.6
+      - key: xai-4nQHNO8S9hxzF9K8hL8fZ7HJ84nXyUe6sm7r0P54Cr5ftzYnD449WIIqCCQuxDWnr6B7swlzKXNJ5fwA
+        sync: false   # 수동 입력 (보안)

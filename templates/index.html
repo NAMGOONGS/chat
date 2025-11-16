@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>내 채팅봇</title>
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    #chat { height: 400px; border: 1px solid #ccc; padding: 10px; overflow-y: scroll; }
+    .msg { margin: 5px 0; }
+    .user { text-align: right; color: blue; }
+    .bot { text-align: left; color: green; }
+  </style>
+</head>
+<body>
+  <h2>AI 채팅봇</h2>
+  <div id="chat"></div>
+  <input type="text" id="input" placeholder="메시지를 입력하세요" style="width:80%">
+  <button onclick="send()">전송</button>
+
+  <script>
+    const chat = document.getElementById('chat');
+    const input = document.getElementById('input');
+
+    async function send() {
+      const msg = input.value.trim();
+      if (!msg) return;
+      addMsg(msg, 'user');
+      input.value = '';
+
+      const res = await fetch('/chat', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({message: msg})
+      });
+      const data = await res.json();
+      addMsg(data.reply, 'bot');
+    }
+
+    function addMsg(text, sender) {
+      const div = document.createElement('div');
+      div.className = `msg ${sender}`;
+      div.textContent = (sender==='user'?'You':'Bot') + ': ' + text;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    input.addEventListener('keypress', e => { if(e.key==='Enter') send(); });
+  </script>
+</body>
+</html>
