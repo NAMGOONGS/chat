@@ -8,7 +8,7 @@ async function sendMessage() {
   addMessage(msg, 'user');
   input.value = '';
 
-  const res = await fetch('/chat/templates/src/js', {
+  const res = await fetch('src', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ message: msg })
@@ -31,3 +31,4 @@ input.addEventListener('keypress', e => {
   if (e.key === 'Enter') sendMessage();
 
 });
+
