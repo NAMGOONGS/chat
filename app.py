@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify, send_from_directory
 import requests
 import os
 
-app = Flask(__name__, static_folder='src')  # src 폴더를 정적 파일로 설정
+app = Flask(__name__, static_folder='/chat/templates/src')  # src 폴더를 정적 파일로 설정
 history = []
 
 API_URL = "https://router.huggingface.co/hf-inference/models/meta-llama/Meta-Llama-3.1-8B-Instruct"
@@ -47,4 +47,5 @@ def chat():
     return jsonify({"reply": bot_msg})
 
 if __name__ == "__main__":
+
     app.run(host="0.0.0.0", port=5000, debug=True)
