@@ -1,7 +1,11 @@
 # 챗봇만들기 입니다.
 파이썬 활용 및 허깅페이스의 Api를 활용하여 render환경+Github 환경에서 구축해보는 연습입니다.
 
-랜더를 통해하여 주소는 https://xai-chat-api.onrender.com 입니다.
+랜더를 통해하여 주소는 https://xai-chat-api.onrender.com/ 입니다.
 기본 무료버전사용으로 다운될 수 있습니다.
 
 추가적인 기능 밑 CSS 부분은 추후 수정 예정입니다.
+
+스타일, 스크립트 분류를 위한 정적 폴더 static 설정진행
+기존 HF_Key 수정 진행
+정적 폴더위치 {url:}설정 진행.
