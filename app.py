@@ -2,7 +2,8 @@ from flask import Flask, render_template, request, jsonify, send_from_directory
 import requests
 import os
 
-app = Flask(__name__, static_folder='/chat/templates/src')  # src 폴더를 정적 파일로 설정
+app = Flask(__name__, static_folder='static',
+            template_folder='templates') 
 history = []
 
 API_URL = "https://router.huggingface.co/hf-inference/models/meta-llama/Meta-Llama-3.1-8B-Instruct"
