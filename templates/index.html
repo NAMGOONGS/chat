@@ -1,23 +1,23 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-  <title>내 채팅봇</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-  <style>
-    body { font-family: sans-serif; margin: 20px; }
-    #chat { height: 400px; border: 1px solid #ccc; padding: 10px; overflow-y: scroll; }
-    .msg { margin: 5px 0; }
-    .user { text-align: right; color: blue; }
-    .bot { text-align: left; color: green; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 채팅봇</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-  <h2>AI 채팅봇</h2>
-  <div id="chat"></div>
-  <input type="text" id="input" placeholder="메시지를 입력하세요" style="width:80%">
-  <button onclick="send()">전송</button>
-  
-  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <div class="container">
+        <h1>AI 채팅봇</h1>
+        <div id="chat-box" class="chat-box"></div>
+        
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="메시지를 입력하세요..." autocomplete="off">
+            <button id="send-btn">전송</button>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
-

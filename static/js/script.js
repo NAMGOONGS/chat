@@ -1,83 +1,53 @@
-// DOM 요소 (나중에 초기화)
-let chat;
-let input;
+document.addEventListener('DOMContentLoaded', () => {
+    const chatBox = document.getElementById('chat-box');
+    const userInput = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
 
-// 초기화 함수
-function initializeChat() {
-  chat = document.getElementById('chat');
-  input = document.getElementById('input');
-  
-  if (!chat || !input) {
-    console.error('필수 DOM 요소를 찾을 수 없습니다');
-    return;
-  }
-  
-  // 엔터키 이벤트 등록
-  input.addEventListener('keypress', e => {
-    if (e.key === 'Enter') send();
-  });
-  
-  console.log('채팅봇 초기화 완료');
-}
-
-// send 함수 - 전역 스코프에 정의 (onclick 속성에서 접근 가능)
-async function send() {
-  const msg = input.value.trim();
-  if (!msg) {
-    console.warn('빈 메시지는 전송할 수 없습니다');
-    return;
-  }
-  
-  console.log('메시지 전송:', msg);
-  
-  const btn = document.querySelector('button');
-  btn.disabled = true;
-  btn.textContent = '전송 중...';
-  
-  addMsg(msg, 'user');
-  input.value = '';
-
-  try {
-    console.log('/chat로 요청 전송 중...');
-    const res = await fetch('/chat', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({message: msg})
-    });
-    
-    console.log('응답 상태:', res.status);
-    
-    if (!res.ok) {
-      throw new Error(`HTTP ${res.status}`);
+    // 요소가 제대로 있는지 확인 (디버깅용)
+    if (!sendBtn) {
+        console.error("send-btn 버튼을 찾을 수 없습니다! ID 확인하세요.");
+        return;
     }
-    
-    const data = await res.json();
-    console.log('서버 응답:', data);
-    addMsg(data.reply, 'bot');
-  } catch (error) {
-    console.error('오류 발생:', error);
-    addMsg('❌ 오류: ' + error.message, 'bot');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '전송';
-  }
-}
 
-// 메시지 추가 함수
-function addMsg(text, sender) {
-  if (!chat) {
-    console.error('chat 요소가 초기화되지 않았습니다');
-    return;
-  }
-  
-  const div = document.createElement('div');
-  div.className = `msg ${sender}`;
-  div.textContent = (sender === 'user' ? 'You' : 'Bot') + ': ' + text;
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
-  console.log('메시지 추가:', sender, text);
-}
+    // 전송 버튼 클릭 이벤트
+    sendBtn.addEventListener('click', sendMessage);
 
-// 페이지 로드 완료 후 초기화
-document.addEventListener('DOMContentLoaded', initializeChat);
+    // 엔터키로도 전송
+    userInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
 
+    function sendMessage() {
+        const message = userInput.value.trim();
+        if (!message) return;
+
+        // 사용자 메시지 표시
+        appendMessage('user', message);
+        userInput.value = '';
+
+        // 서버로 보내기 (fetch 예시)
+        fetch('/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: message })
+        })
+        .then(response => response.json())
+        .then(data => {
+            appendMessage('bot', data.response || '응답이 없습니다.');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            appendMessage('bot', '오류가 발생했습니다.');
+        });
+    }
+
+    function appendMessage(sender, text) {
+        const msgDiv = document.createElement('div');
+        msgDiv.classList.add('message', sender);
+        msgDiv.innerHTML = `<p>${text}</p>`;
+        chatBox.appendChild(msgDiv);
+        chatBox.scrollTop = chatBox.scrollHeight; // 자동 스크롤
+    }
+});
