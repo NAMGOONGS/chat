@@ -25,16 +25,34 @@
     async function send() {
       const msg = input.value.trim();
       if (!msg) return;
+      
+      const btn = document.querySelector('button');
+      btn.disabled = true;
+      btn.textContent = '전송 중...';
+      
       addMsg(msg, 'user');
       input.value = '';
 
-      const res = await fetch('/chat', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({message: msg})
-      });
-      const data = await res.json();
-      addMsg(data.reply, 'bot');
+      try {
+        const res = await fetch('/chat', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({message: msg})
+        });
+        
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+        
+        const data = await res.json();
+        addMsg(data.reply, 'bot');
+      } catch (error) {
+        console.error('오류:', error);
+        addMsg('❌ 오류: ' + error.message, 'bot');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '전송';
+      }
     }
 
     function addMsg(text, sender) {
