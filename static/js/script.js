@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
         userInput.disabled=true;
 
     try{ 
-          const respone=await fetch('/'{
+          const respone=await fetch('/'){
              method: 'POST',
              headers: { 'Content-Type': 'application/json' },
              body: JSON.stringify({ message: message })
@@ -59,3 +59,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 });
+
