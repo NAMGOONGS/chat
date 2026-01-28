@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    async function sendMessage() {
+    async function sendMessage(){
         const message = userInput.value.trim();
         if (!message) return;
 
@@ -29,9 +29,9 @@ document.addEventListener('DOMContentLoaded', () => {
         userInput.disabled=true;
 
     try{ 
-          const respone=await fetch('/'){
-             method: 'POST',
-             headers: { 'Content-Type': 'application/json' },
+          const respone=await fetch('/')({
+             method :'POST',
+             headers: {'Content-Type' :'application/json' },
              body: JSON.stringify({ message: message })
         });
           if (!response.ok){
@@ -40,7 +40,8 @@ document.addEventListener('DOMContentLoaded', () => {
           }
           const data=await response.json();
         appendMessage('bot',data.respone || '응답이 없습니다.');
-      }catch(error) 
+      }
+      catch(error)  {
         console.error('Error',error);
         appendMessage('bot',`전송 중 오류가 발생 하였습니다. 잠시후 다시 시도해 주세요(${error.message})`);
     }
