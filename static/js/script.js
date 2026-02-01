@@ -33,20 +33,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const response = await fetch('/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: message })
-            });
+            const response = await fetch('/chat', {   // '/' → '/chat' 변경
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: message })
+});
 
-            if (!response.ok) {
-                const errorDetails = await response.text();
-                throw new Error(`서버응답오류 : ${response.status}-${errorDetails}`);
-            }
+if (!response.ok) {
+    const errorDetails = await response.text();
+    throw new Error(`서버응답오류 : ${response.status}-${errorDetails}`);
+}
 
-            const data = await response.json();
-            // API 필드명이 response인지 respone인지 확실하지 않으니 둘 다 체크
-            appendMessage('bot', (data && (data.response || data.respone)) || '응답이 없습니다.');
+const data = await response.json();
+// 백엔드가 {"reply": "..."} 를 반환하므로 reply 사용
+appendMessage('bot', (data && data.reply) || '응답이 없습니다.');
         } catch (error) {
             console.error('Error', error);
             appendMessage('bot', `전송 중 오류가 발생하였습니다. 잠시후 다시 시도해 주세요(${error.message})`);
